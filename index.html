@@ -32,6 +32,48 @@ nav{display:flex;align-items:center;justify-content:space-between;border-bottom:
 </main><footer class="wrap"><span>© <span id="year"></span> 靓点连点器</span><span>Android 独立下载站</span></footer>
 <script src="./config.js"></script>
 <script>
-(function(){const c=window.LIANGDIAN_SITE||{};document.querySelector('#year').textContent=new Date().getFullYear();if(c.version)document.querySelector('#version').textContent=c.version;const url=typeof c.apkUrl==='string'?c.apkUrl.trim():'';const ok=/^https:\/\//.test(url);const btn=document.querySelector('#apk');if(ok){btn.href=url;btn.textContent='↓ 下载 Android APK';btn.removeAttribute('aria-disabled');document.querySelector('#help').textContent='请确认下载版本和安装权限';document.querySelector('#status').textContent='已发布：'+(c.version||'最新版本')}else{btn.removeAttribute('href');btn.setAttribute('aria-disabled','true');btn.textContent='APK 尚未发布';document.querySelector('#help').textContent='待 APK 编译通过和正式上传后开放';document.querySelector('#status').textContent='下载站已准备好 · APK 尚未发布'}})();
+(async function () {
+  const c = window.LIANGDIAN_SITE || {};
+  const button = document.querySelector('#apk');
+  const help = document.querySelector('#help');
+  const status = document.querySelector('#status');
+  const version = document.querySelector('#version');
+  document.querySelector('#year').textContent = new Date().getFullYear();
+  if (c.version) version.textContent = c.version;
+  const setUnavailable = (message) => {
+    button.removeAttribute('href');
+    button.setAttribute('aria-disabled', 'true');
+    button.textContent = 'APK 尚未发布';
+    help.textContent = message;
+    status.textContent = '下载站已上线 · APK 尚未发布';
+  };
+  const setDownload = (url, tag) => {
+    if (!/^https:\/\//.test(url)) return setUnavailable('安装包链接无效');
+    button.href = url;
+    button.textContent = '↓ 下载 Android APK';
+    button.removeAttribute('aria-disabled');
+    help.textContent = '通过 GitHub 官方 Releases 下载 APK；请留意手机安全提示';
+    if (tag) version.textContent = tag;
+    status.textContent = '可下载：' + (tag || c.version || '最新版');
+  };
+  setUnavailable('正在检查最新版本…');
+  const explicit = typeof c.apkUrl === 'string' ? c.apkUrl.trim() : '';
+  if (explicit) return setDownload(explicit, c.version);
+  try {
+    const endpoint = 'https://api.github.com/repos/zonglianpan-commits/-LiangDian-Download/releases/latest';
+    const response = await fetch(endpoint, { headers: { 'Accept': 'application/vnd.github+json' } });
+    if (response.status === 404) return setUnavailable('尚未发布 APK。请先在仓库 Releases 上传安装包');
+    if (!response.ok) throw new Error('GitHub API status ' + response.status);
+    const release = await response.json();
+    const apk = Array.isArray(release.assets) ? release.assets.find(asset =>
+      asset && typeof asset.name === 'string' && /\.apk$/i.test(asset.name) &&
+      typeof asset.browser_download_url === 'string' && asset.state === 'uploaded'
+    ) : null;
+    if (!apk) return setUnavailable('最新 Release 尚未附带 APK 文件');
+    setDownload(apk.browser_download_url, release.tag_name);
+  } catch (error) {
+    setUnavailable('无法检查 GitHub 最新版本，请刷新网页或稍后重试');
+  }
+})();
 </script>
 </body></html>
