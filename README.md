@@ -17,19 +17,15 @@ https://zonglianpan-commits.github.io/-LiangDian-Download/
 3. Branch 选 **main**，Folder 选 **/(root)**，点击 Save。
 4. 等 Pages 部署后访问上述网站，建议用匿名浏览器确认可以正常打开。
 
-## 如何发布 APK 并开启下载按钮
+## 如何发布 APK 并自动启用下载按钮
 
-1. 从私有 Bruce 仓库 Android GitHub Actions 获取最新版 **成功构建** 的 APK，并先在测试手机上验证。
-2. 进入本公开仓库的 Releases → Draft a new release，创建标签 `v2.3.0`。
-3. 上传真实 APK，建议重命名为 `LiangDian-v2.3.0.apk` 后发布。
-4. 复制该 APK 在公开 Release Assets 中的**真实下载 URL**，用无痕浏览器测试能否下载。
-5. 将 `config.js` 中的 `apkUrl: ""` 替换为真实 URL，提交后网站下载按钮才会启用。
+1. 在私有仓库 Bruce 的 Android Actions 里选择最新**成功**构建，下载 `AutoTap-debug-apk` ZIP，解压获得 `app-debug.apk`，并在测试手机验证它确实能运行。
+2. 在本公开仓库打开 [Releases](https://github.com/zonglianpan-commits/-LiangDian-Download/releases) → `Draft a new release`，建立版本标签（如 `v2.3.0`）。
+3. 将真实 APK 上传到 Release Assets，建议文件名 `LiangDian-v2.3.0.apk`；填好说明，点击 **Publish release**（不要保留 Draft 或标记为 Prerelease）。
+4. 网站会通过 GitHub 公开 API **自动识别最新正式 Release 的 .apk 文件**并启用下载按钮。无需修改 `config.js`。
+5. 用未登录 GitHub 的浏览器打开网站并下载验证。
 
-例如，若确实存在同名 Release asset，它的 URL 可能是：
-
-`https://github.com/zonglianpan-commits/-LiangDian-Download/releases/download/v2.3.0/LiangDian-v2.3.0.apk`
-
-不要在未上传 APK 前填写这一 URL；网站会将按钮保持为「APK 尚未发布」。
+如果确实需要手动指定 APK 链接，可在 `config.js` 的 `apkUrl` 填写已发布 APK 的 HTTPS 下载网址。未发布前保持空字符串，按钮自动禁用。
 
 ## 注意
 
